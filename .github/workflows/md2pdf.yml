@@ -23,7 +23,7 @@ jobs:
 
       - name: Convert MD to PDF
         run: |
-          pandoc dotnet_resume.md -f gfm -t html5 -c style.css --pdf-engine=weasyprint -o dotnet_resume.pdf
+          pandoc dotnet_resume.md -f gfm -t html5 --wrap=preserve -c style.css --pdf-engine=weasyprint -o dotnet_resume.pdf
 
       - name: Commit and push PDF
         run: |
