@@ -2,26 +2,29 @@ name: Markdown to PDF
 
 on:
   push:
-    paths:
-      - '*.md'
+    branches:
+      - main
 
 jobs:
-  build:
+  convert_md_to_pdf:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Pandoc
-        uses: docker://pandoc/latex:latest
-
-      - name: Convert Markdown to PDF
+      - name: Install dependencies
         run: |
-          pandoc dotnet_resume.md -o dotnet_resume.pdf
+          sudo apt-get update
+          sudo apt-get install -y pandoc wkhtmltopdf
 
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: pdf-output
-          path: dotnet_resume.pdf
+      - name: Convert MD to PDF
+        run: |
+          pandoc dotnet_resume.md -f gfm -t pdf --pdf-engine=wkhtmltopdf -o dotnet_resume.pdf
+
+      - name: Commit and push PDF
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add dotnet_resume.pdf
+          git commit -m "Convert dotnet_resume.md to dotnet_resume.pdf"
+          git push
