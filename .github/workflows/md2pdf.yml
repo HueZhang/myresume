@@ -1,0 +1,27 @@
+name: Markdown to PDF
+
+on:
+  push:
+    paths:
+      - '*.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Pandoc
+        uses: docker://pandoc/latex:latest
+
+      - name: Convert Markdown to PDF
+        run: |
+          pandoc dotnet_resume.md -o dotnet_resume.pdf
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pdf-output
+          path: dotnet_resume.pdf
