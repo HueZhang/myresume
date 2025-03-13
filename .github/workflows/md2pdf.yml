@@ -23,11 +23,6 @@ jobs:
           @page {
             size: A4;
             margin: 2cm;
-            @top-center {
-              content: "Dotnet Resume";
-              font-size: 12pt;
-              color: #555;
-            }
             @bottom-center {
               content: counter(page);
               font-size: 10pt;
@@ -84,8 +79,6 @@ jobs:
             -t html5 \
             --wrap=preserve \
             -c style.css \
-            --metadata title="Dotnet Resume" \
-            --metadata author="Your Name" \
             --pdf-engine=weasyprint \
             -o dotnet_resume.pdf
 
