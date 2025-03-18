@@ -20,6 +20,7 @@
 - **版本控制**：熟悉Git、SVN等版本控制工具。
 - **开发工具**：熟练使用Visual Studio、Navicat、Microsoft SQL Server Management Studio、Putty、VMware Workstation等开发工具，能够根据需求快速构建项目。
 - **其他编程语言**：熟练使用Java、Python，具备C/C++语言的使用经验。
+- **串口协议**：熟悉ModbusRTU， ModbusTCP等串口协议。
 
 ## 工作经历
 
