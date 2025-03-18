@@ -1,9 +1,7 @@
 ## 基本信息
 
-**姓名** ：张昊宇 				                  
-**出生日期** ：1999/11/14																					
-**手机/微信** ：15290582150				
-**邮箱**：zhang_19991114@163.com
+**姓名** ：张昊宇 				                  **出生日期** ：1999/11/14				**学历**：本科																	
+**手机/微信** ：15290582150				**邮箱**：zhang_19991114@163.com
 
 ## 个人简介
 
@@ -11,16 +9,17 @@
 
 ## 专业技能
 
-- **编程语言与框架**：熟练使用.NET（C#、VB）进行开发，熟悉MVC三层架构，熟悉.NET Framework和.NET Core的知识，熟悉LINQ的使用。
-- **数据库技术**：熟悉Entity Framework，Dapper， SQLSugar等ORM的使用。SQL Server、MySQL、Oracle SQL等数据库开发技术。
+- **编程语言与框架**：熟练使用.NET（C#、VB）进行开发，熟悉MVC三层架构，DDD架构，熟悉.NET Framework和.NET Core的知识，熟悉LINQ，异步的使用，熟练Restful API的开发，熟悉ABP框架。
+- **数据库技术**：熟悉Entity Framework，Dapper， SQLSugar等ORM的使用。SQL Server、MySQL、Oracle等数据库开发技术。
 - **网络协议**：熟悉Socket通信原理，了解HTTP、DHCP、DNS等网络协议的原理及应用。
 - **操作系统**：熟悉Linux系统及常用操作命令，能够在Linux上部署服务、安装服务和软件；可快速在Linux部署服务。
 - **通信协议**：熟悉Modbus协议的使用。
 - **前端技术**：熟悉HTML、JS、CSS、Vue等前端开发技术。
-- **版本控制**：熟悉Git、SVN等版本控制工具。
 - **开发工具**：熟练使用Visual Studio、Navicat、Microsoft SQL Server Management Studio、Putty、VMware Workstation等开发工具，能够根据需求快速构建项目。
-- **其他编程语言**：熟练使用Java、Python，具备C/C++语言的使用经验。
 - **串口协议**：熟悉ModbusRTU， ModbusTCP等串口协议。
+- **桌面开发**：熟练使用 WinForms 和 WPF 进行桌面应用开发，具备 MVVM 设计模式实践经验，能够使用 Community ToolKi 构建模块化应用；熟悉使用Binding、Command、Style、Template、Resource等。
+- **其他编程语言**：熟练使用其他面向对象语言Java、Python等，具备C/C++语言的使用经验，用过嵌入式开发板（STM32F103C8T6）。
+- **版本控制**：熟悉Git、SVN等版本控制工具。
 
 ## 工作经历
 
