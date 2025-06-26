@@ -14,6 +14,7 @@
 ## 技术技能
 
 - **后端开发**：精通 C# / .NET Core / ASP.NET MVC / Web API / LINQ / 异步编程 / DDD，熟悉ABP框架的使用
+- **中间件与消息队列**：熟练使用 Redis 进行缓存，使用 RabbitMQ  等消息队列实现异步解耦与系统解耦，了解中间件在系统架构中的作用和使用场景
 - **前端技术**：熟悉 Vue3 / element-plus /vue-router / pinia / axios，用于中后台管理系统开发
 - **数据库**：熟练使用 SQL Server、MySQL、Oracle，掌握 SQL 优化与索引设计，使用过 EF Core / Dapper / SQLSugar
 - **系统设计与架构**：具备独立模块设计、接口规范定义能力，熟悉 RBAC 权限设计、多租户架构、缓存机制
