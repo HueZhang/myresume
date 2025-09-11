@@ -18,7 +18,7 @@
 - **前端技术**：熟悉 Vue3 / element-plus /vue-router / pinia / axios，用于中后台管理系统开发
 - **数据库**：熟练使用 SQL Server、MySQL、Oracle，掌握 SQL 优化与索引设计，使用过 EF Core / Dapper / SQLSugar
 - **系统设计与架构**：具备独立模块设计、接口规范定义能力，熟悉 RBAC 权限设计、多租户架构、缓存机制
-- **微服务和持续集成**：熟练使用nacos进行服务的注册，发现和配置管理；熟练jekins搭建你自动化流水线。
+- **微服务和持续集成**：熟练使用nacos进行服务的注册，发现和配置管理；熟练使用jekins搭建自动化流水线。
 - **桌面开发**：熟练 WinForms、WPF + MVVM，能开发高交互性桌面工具；熟练使用 CommunityToolkit.Mvvm + WPF-UI 框架进行 WPF 开发
 - **部署与运维**：熟悉 Linux 操作系统，掌握常用命令（systemctl / journalctl / netstat / top 等）和 Shell 脚本，能独立完成部署、日志排查与服务调试；掌握 Docker 镜像构建与 Helm 脚本编排，熟悉 Kubernetes 部署流程与 Nginx 配置
 - **工具与版本控制**：熟悉 Git / SVN / Visual Studio / Navicat / SQL Management Studio
