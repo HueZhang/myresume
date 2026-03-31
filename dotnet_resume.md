@@ -8,17 +8,20 @@
 
 ## 个人简介
 
-5 年 .NET 后端开发经验，擅长系统架构设计、分布式应用开发与复杂业务建模。精通 C#/.NET 生态，具备扎实的并发处理、数据库优化与系统解耦能力；熟悉微服务与多租户架构，能独立完成从 0 到 1 的模块落地与交付。具备 Vue3 中后台开发能力，可完成前后端协同交付。
+5 年 .NET 后端开发经验，覆盖 .NET Framework / .NET Core / ASP.NET MVC / Web API。擅长需求分析、系统设计、编码、测试、部署与运维一体化交付；具备并发处理、性能优化、数据库设计与系统解耦能力，熟悉多租户、RBAC 与分布式架构。可独立完成接口设计与技术文档编写，具备 Vue3 中后台开发能力，支持前后端协同交付；了解 MES 系统常见业务与前后端分离架构（Vue + .NET）。
 
 ## 技术技能
 
-- **后端开发**：C# / .NET Core / ASP.NET Core Web API / LINQ / 异步编程 / DDD / ABP（熟悉）
+- **后端开发**：C# / .NET Core / .NET Framework / ASP.NET MVC / ASP.NET Core Web API / LINQ / 异步编程 / 多线程 / DDD / 设计模式
+- **通信与集成**：WebSocket / Socket；Web Services（SOAP）/ XML（了解）
 - **中间件与消息**：Redis（缓存、限流、Pub/Sub）、RabbitMQ
-- **前端技术**：Vue3 / Element Plus / Vue Router / Pinia / Axios
-- **数据库**：SQL Server / MySQL / Oracle，SQL 优化与索引设计；EF Core / Dapper / SqlSugar
-- **系统设计**：RBAC 权限、多租户隔离、接口规范、缓存与性能优化
+- **前端技术**：Vue3 / Element Plus / Vue Router / Pinia / Axios / JavaScript / HTML / CSS / Ajax / jQuery
+- **数据库**：SQL Server / MySQL / Oracle，复杂查询、视图、存储过程与作业；MongoDB；EF Core / Dapper / SqlSugar
+- **系统设计**：RBAC 权限、多租户隔离、接口规范、缓存与性能优化、IOC/DI
+- **流程引擎**：Workflow Core（审批流建模、节点配置、层级流转）
 - **微服务与 DevOps**：Nacos（注册/配置）、Jenkins 流水线、Docker、Helm、K8s、Nginx
 - **桌面开发**：WinForms / WPF + MVVM，CommunityToolkit.Mvvm + WPF-UI
+- **工程化与文档**：接口文档、需求/概要/详细设计文档编写
 - **运维与排障**：Linux 常用命令、Shell 脚本、日志与性能定位
 - **其他**：串口通信（RS232）；AI 工具辅助开发（Codex / Claude / Gemini）
 
@@ -30,14 +33,15 @@
 
 *C# 后端开发工程师 | 2025/07 - 至今*
 
-- 负责多个独立系统的架构设计与落地，涵盖专家培训考试、电子发票网关、金融保函等业务
+- 负责多个独立系统的需求分析、架构设计与落地，涵盖专家培训考试、电子发票网关、金融保函等业务
+- 独立完成接口设计与文档编写，配合前端联调与测试验收，上线后持续运维与优化
 - 解决高并发登录、文件转码、第三方 API 集成与成本优化等关键技术问题
 
 ### 苏州华墨信息科技有限公司
 
 *C# 后端开发工程师 | 2024/03 - 2025/07*
 
-- 参与 HDIS 血液透析系统的前后端开发与性能优化
+- 参与 HDIS 血液透析系统的前后端开发、性能优化与模块交付
 
 ### 杭州智瑞思科技有限公司
 
@@ -60,6 +64,7 @@
   - 基于 Redis 队列 + Webhook 构建异步转码管道，转码任务平均等待时长下降约 40%
   - 设计动态题库与自定义培训模型，支持规则组卷与学习进度控制
   - 多节点 WebSocket 消息路由（Redis Pub/Sub），保障实时推送一致性
+  - 基于 Workflow Core 搭建通用审批流：支持按部门/角色/身份配置权限，提交后按层级自动流转与审批
 
 #### 多租户电子发票网关系统
 
@@ -81,9 +86,9 @@
 
 - **金融保函核心业务系统**：工厂 + 策略模式抽象多资方接入；SM4 + 摘要实现报文防篡改与加密传输
 - **API 网关与代理服务**：基于 ASP.NET Core + Refit 统一接口代理与鉴权透传
-- **IOT 医疗设备采集系统**：WinForms + 串口协议采集设备数据；CEF 内嵌前端图表展示
 - **ETL 医疗数据集成平台**：数据清洗与标准化、错误重试与告警、Hangfire 批处理与 Serilog 追踪
 - **WPF 提效工具**：翻译辅助与任务流转工具，提升国际化与团队协作效率
+- **IOT 医疗设备采集系统**：WinForms + 串口协议采集设备数据；CEF 内嵌前端图表展示
 
 ------
 
