@@ -74,20 +74,32 @@ jobs:
           }
           EOF
 
-      - name: Convert Markdown to PDF with metadata
+      - name: Create pdf directory if not exists
         run: |
-          pandoc dotnet_resume.md \
-            -f gfm \
-            -t html5 \
-            --wrap=preserve \
-            -c style.css \
-            --pdf-engine=weasyprint \
-            -o dotnet_resume.pdf
+          if [ ! -d "pdf" ]; then
+            mkdir pdf
+          fi
+
+      - name: Convert all Markdown files to PDF
+        run: |
+          for md_file in *.md; do
+            if [ -f "$md_file" ]; then
+              pdf_name="${md_file%.md}.pdf"
+              echo "Converting $md_file to pdf/$pdf_name"
+              pandoc "$md_file" \
+                -f gfm \
+                -t html5 \
+                --wrap=preserve \
+                -c style.css \
+                --pdf-engine=weasyprint \
+                -o "pdf/$pdf_name"
+            fi
+          done
 
       - name: Commit and push PDF
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git add dotnet_resume.pdf
-          git commit -m "Optimize PDF layout and regenerate dotnet_resume.pdf"
+          git add pdf/
+          git commit -m "Convert all markdown files to PDF"
           git push
