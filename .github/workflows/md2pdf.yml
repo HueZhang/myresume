@@ -80,21 +80,53 @@ jobs:
             mkdir pdf
           fi
 
-      - name: Convert all Markdown files to PDF
+      - name: Get changed markdown files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            *.md
+
+      - name: Convert changed or new Markdown files to PDF
         run: |
-          for md_file in *.md; do
-            if [ -f "$md_file" ]; then
-              pdf_name="${md_file%.md}.pdf"
-              echo "Converting $md_file to pdf/$pdf_name"
-              pandoc "$md_file" \
-                -f gfm \
-                -t html5 \
-                --wrap=preserve \
-                -c style.css \
-                --pdf-engine=weasyprint \
-                -o "pdf/$pdf_name"
-            fi
-          done
+          # 获取变更的文件列表
+          CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
+          ANY_CHANGED="${{ steps.changed-files.outputs.any_changed }}"
+          echo "Any changed: $ANY_CHANGED"
+          echo "Changed files: $CHANGED_FILES"
+
+          # 如果没有变更（首次运行等情况），转换所有文件
+          if [ "$ANY_CHANGED" = "false" ] || [ -z "$CHANGED_FILES" ]; then
+            echo "No changes detected, converting all markdown files..."
+            for md_file in *.md; do
+              if [ -f "$md_file" ] && [[ "$md_file" != "README.md" ]]; then
+                pdf_name="${md_file%.md}.pdf"
+                echo "Converting $md_file to pdf/$pdf_name"
+                pandoc "$md_file" \
+                  -f gfm \
+                  -t html5 \
+                  --wrap=preserve \
+                  -c style.css \
+                  --pdf-engine=weasyprint \
+                  -o "pdf/$pdf_name"
+              fi
+            done
+          else
+            # 转换变更的文件
+            for md_file in $CHANGED_FILES; do
+              if [ -f "$md_file" ] && [[ "$md_file" != "README.md" ]]; then
+                pdf_name="${md_file%.md}.pdf"
+                echo "Converting $md_file to pdf/$pdf_name"
+                pandoc "$md_file" \
+                  -f gfm \
+                  -t html5 \
+                  --wrap=preserve \
+                  -c style.css \
+                  --pdf-engine=weasyprint \
+                  -o "pdf/$pdf_name"
+              fi
+            done
+          fi
 
       - name: Commit and push PDF
         run: |
