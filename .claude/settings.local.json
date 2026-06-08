@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "mcp__tavily__tavily_search",
+      "WebFetch(domain:m.zhipin.com)",
+      "WebFetch(domain:www.qcc.com)"
     ]
   }
 }
