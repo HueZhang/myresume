@@ -1,0 +1,76 @@
+ spring boot cloud 微服务
+ redis 分布式锁  MQ
+ 多线程
+ 线程池
+ sql调优
+ 联合索引 失效得场景 破坏最左匹配原则
+ in 也会导致不走索引
+ hashmap扩容原理
+ 
+ mysql  in走索引  int（10）  int(11) 区别 存储长度 显示长度
+联合索引age>20  sex=1  orderby score desc
+string底层char数组
+ str a = hello   str  b  =  he  +  new str llo  a ==b
+int a = 100  integer b = 100  a==b
+mysql底层b+树
+new thread a  run sout a    start    sout b
+单例模式  手写
+hashmap的扩容   1000数据  往里面放1000会扩容吗
+
+ @Transactional  失效的 80% 原因就三个：方法不是 public、同类自调用、异常被捕获了。写代码时注意这三点，基本不会踩坑。
+
+spring 的  bean实例是否线程安全
+
+mybatis一对多怎么查
+
+回表
+
+springsecurity做认证授权
+
+用openfeign跨服务调用的时候 从头到尾 用到什么注解  底层调用逻辑
+用reddison实现我的前端调用生成报告功能，从头到尾的实现逻辑
+
+
+sql数据量就是很大  索引也有就是很卡  怎么解决
+spring事物的执行机制
+因为网络问题看门狗失效
+接口调用失败的重试机制  
+feign调用失败 怎么排查
+
+wps的在线编辑接口
+redisson的
+artivity工作流的表
+
+一个接口很慢  怎么去优化
+远程调用的时候每次都发http请求  再加上每次都要建立连接 该怎么弄  每次都要跟mysql建立连接
+mq消息堆积了怎么办
+
+100w个用户  每年1.1清零积分
+
+poi导入数据量过大  导致内存溢出
+
+mq的重复消费和保证消费成功
+
+死锁怎么造成的  怎么避免
+arthas  trace追踪排查接口慢
+
+接口安全验证  
+BCryptPasswordEncoder  加密
+
+springbootapplication注解
+分库分表 
+高并发
+ioc 控制反转  依赖注入
+list转map
+
+消息大量unack
+接口要求qps200怎么做
+缓存不一致 失效模式 双写模式
+正常jar包是一个java程序 为啥springboot的jar包可以是web应用
+order by排序的话需要注意什么导致索引失效呢
+多线程怎么保证线程安全
+导出用文件名  date.now等获取当前时间的方法是否线程安全
+怎样设计线程池的核心线程数
+千万条数据查询  怎么做  注意什么
+
+linux 线上有个前端页面调不到后端controller了
