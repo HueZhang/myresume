@@ -461,6 +461,63 @@ public interface OrderClient {
 
 **feign 每次发 http 请求建立连接问题：** 配置 Apache HttpClient 连接池，复用 TCP 连接
 
+------
+
+### springcloudealibaba
+
+| 核心能力         | Netflix（已死或停更） | Spring Cloud Alibaba（替代者） | 一句话优势                                           |
+| :--------------- | :-------------------- | :----------------------------- | :--------------------------------------------------- |
+| **服务注册发现** | Eureka（停更）        | **Nacos**                      | 支持AP/CP切换，健康检查更灵敏，自带配置中心          |
+| **配置管理**     | Config + Bus（难用）  | **Nacos Config**               | 实时热更新，灰度发布，权限控制，一个平台管所有       |
+| **限流熔断**     | Hystrix（停更）       | **Sentinel**                   | 可视化Dashboard，动态规则调整，支持热点参数限流      |
+| **分布式事务**   | 无（需自己搞）        | **Seata**                      | 开箱即用的AT/TCC模式，解决订单-库存-积分的数据一致性 |
+
+```
+外部请求
+   │
+   ▼
+Spring Cloud Gateway (网关：统一入口、鉴权、限流)
+   │
+   ▼
+微服务 A (如订单服务) ──── 注册到 ────▶  Nacos (注册中心 & 配置中心)
+   │         │                                │
+   │         ├─ 调用微服务 B (如库存服务) ────┘
+   │         │
+   │         ├─ 调用微服务 C (如积分服务) ────┘
+   │         │
+   │         ├─ 流量保护 ◀─── Sentinel (限流/熔断/降级)
+   │         │
+   │         ├─ 异步解耦 / 削峰 ───▶ RocketMQ (消息队列) ──▶ 消费者服务
+   │         │
+   │         └─ 分布式事务 ◀─── Seata (协调订单、库存、积分的事务)
+   │
+   └─ 持久化数据 ──▶ MySQL / Redis
+```
+
+**完整流程应该是这样的：**
+
+1. **Gateway 生成内部 Token**：用一把**所有微服务共享的密钥**签名，有效期设长。
+2. **服务 A 携带 Token 调服务 B**：通过 Feign 拦截器自动带上。
+3. **服务 B 收到请求，用同样的密钥验证 Token 签名**：确认它是 Gateway 签发的，不是伪造的。
+4. **服务 B 解析出用户身份**：设置到自己的 SecurityContext 里，然后做权限判断。
+
+**同步调用传Token，异步（MQ）消息传身份**
+
+```
+1. 用户请求到达 Gateway
+2. Gateway 校验用户JWT（验签名、过期、黑名单）
+3. Gateway 向 Nacos 查询服务A的地址
+4. Gateway 生成内部Token（长有效期），放入 X-Internal-Token 头
+5. Gateway 转发请求到服务A
+6. 服务A 校验内部Token（验签名），解析出 userId/roles 设置到 SecurityContext
+7. 服务A 执行业务逻辑
+8. 如果服务A需要调用服务B：
+   ├── 同步调用：Feign拦截器自动携带 X-Internal-Token → 服务B验签
+   └── 异步调用：发MQ消息，消息体里携带 userId → 服务B从消息体取身份
+```
+
+
+
 ---
 
 ### Q19: 微服务体系核心组件
@@ -477,6 +534,66 @@ public interface OrderClient {
 ---
 
 ## 四、MySQL 数据库
+
+### MVCC：
+
+> **让读不阻塞写，写不阻塞读，还能保证读到的数据是一致的历史快照。**
+
+#### 隐藏列:
+
+| 隐藏列        | 全名                 | 作用                               |
+| :------------ | :------------------- | :--------------------------------- |
+| `DB_TRX_ID`   | 事务ID               | 最后一次修改这行数据的事务ID       |
+| `DB_ROLL_PTR` | 回滚指针             | 指向Undo Log中这行数据的上一个版本 |
+| `DB_ROW_ID`   | 行ID（如果没有主键） | 自增行号                           |
+
+#### Undo Log:
+
+每当你更新一行数据，InnoDB不直接覆盖，而是：
+
+1. 把旧数据拷贝到Undo Log。
+2. 更新当前数据，把`DB_TRX_ID`设成当前事务ID。
+3. 把`DB_ROLL_PTR`指向Undo Log里的旧版本。
+
+**这样一行数据就形成了一个版本链**：
+
+```
+当前版本 (TRX_ID=100) → Undo Log v2 (TRX_ID=99) → Undo Log v1 (TRX_ID=88) → 初始版本
+```
+
+#### ReadView:
+
+当你启动一个事务执行快照读（普通的SELECT），InnoDB会生成一个ReadView，它包含：
+
+- **`m_ids`**：当前活跃的（未提交的）事务ID列表。
+- **`min_trx_id`**：活跃事务的最小ID。
+- **`max_trx_id`**：下一个即将分配的事务ID。
+- **`creator_trx_id`**：创建这个ReadView的事务ID。
+
+**ReadView就是个“时间滤镜”**，它让你只能看到在你事务开始前已经提交的数据。
+
+```java
+if (TRX_ID == creator_trx_id) {
+    // 我自己修改的，可见
+    return 可见;
+}
+if (TRX_ID < min_trx_id) {
+    // 在我开始前就提交了，可见
+    return 可见;
+}
+if (TRX_ID >= max_trx_id) {
+    // 是我开始之后才启动的事务，不可见
+    return 不可见，沿着版本链往下找;
+}
+if (TRX_ID 在 m_ids 里) {
+    // 是活跃事务，还没提交，不可见
+    return 不可见，往下找;
+}
+// 否则，已经提交了，可见
+return 可见;
+```
+
+
 
 ### Q20: MySQL 底层 B+ 树
 
@@ -644,6 +761,173 @@ WHERE a>20 AND b=1 AND c=2  → 只有 a 走索引（a 是范围查询，b/c 失
 - 跨库事务 → 柔性事务（Seata/可靠消息）
 - 扩容 → 一致性哈希、双倍扩容
 
+
+
+### 乐观锁 悲观锁
+
+悲观锁：每次拿数据时都认为**别人会修改**，所以全程加锁，不让别人碰。
+
+```sql
+-- 开启事务
+BEGIN;
+
+-- 查库存，加排他锁（其他事务不能读也不能写这一行）
+SELECT stock FROM product WHERE id = 1 FOR UPDATE;
+
+-- 你拿到stock=10，开始扣减
+UPDATE product SET stock = stock - 1 WHERE id = 1;
+
+-- 提交事务，释放锁
+COMMIT;
+```
+
+`SELECT ... FOR UPDATE`会给这行加**行级排他锁**。其他事务想读这行（除非用`快照读`绕过）或更新，都得等待当前事务释放锁。
+
+乐观锁：每次拿数据时都认为**别人不会修改**，只在最后更新时检查一下数据有没有被人动过。
+
+依赖一个`version`字段。
+
+```sql
+-- 查询当前库存和版本号
+SELECT stock, version FROM product WHERE id = 1;
+-- 假设查到 stock=10, version=1
+
+-- 更新时带上版本号条件
+UPDATE product 
+SET stock = stock - 1, version = version + 1 
+WHERE id = 1 AND version = 1;
+```
+
+**关键点**：如果`WHERE version = 1`影响行数为0，说明在你操作期间有人改过，版本号从1变成了2。你需要重新查、重新算。
+
+```java
+// 实体类加@Version注解
+@Data
+public class Product {
+    private Long id;
+    private String name;
+    private Integer stock;
+    @Version
+    private Integer version;
+}
+
+// 配置插件 MP可以自动实现
+@Configuration
+public class MybatisPlusConfig {
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
+        return interceptor;
+    }
+}
+
+// 业务代码
+public void deductStock(Long productId) {
+    Product product = productMapper.selectById(productId);
+    product.setStock(product.getStock() - 1);
+    int rows = productMapper.updateById(product);
+    if (rows == 0) {
+        throw new RetryException("数据已被修改，请重试");
+    }
+}
+```
+
+**选型：**
+
+```
+有高并发写冲突吗？
+├── 没有（或者冲突很低）
+│   └── 乐观锁，省心省力
+│
+├── 有，但冲突集中在少数热点（如秒杀单品）
+│   └── 悲观锁 + 排队（或者直接用Redis原子扣减）
+│
+├── 有，且读多写少（如个人资料编辑）
+│   └── 乐观锁，冲突概率极低
+│
+└── 有，且是长事务（跨服务调用）
+    └── 乐观锁（悲观锁长事务会导致锁一直不释放，系统卡死）
+```
+
+#### 令牌桶：
+
+**令牌桶算法的三个核心参数**：
+
+1. **令牌生成速率**：你爸多久放一个硬币。（比如每秒10个，即10 QPS）
+2. **桶容量**：存钱罐最多装几个硬币。（比如100个，应对突发流量）
+3. **每次请求消耗令牌数**：一般每次消耗1个。
+
+**漏桶和令牌桶：**
+
+- **漏桶**：像个有洞的水桶，水（请求）从上面倒进去，从底部匀速流出。**不管你倒多快，出水速度恒定。** 相当于强制**削峰填谷**，把流量整得平平的。但它的问题是一旦桶满了，多余的水直接溢出（拒绝请求），**完全没有突发处理能力**。
+- **令牌桶**：令牌以恒定速率产生，但可以**攒着**。平时没人用，令牌就攒满了一桶（比如100个）。突然来了100个请求，只要桶里有100个令牌，就能全部放行。**它允许一定程度的突发流量，这是它最大的优势。**
+
+**实现：**
+
+1. 单机：Guava（google）
+
+2. 分布式：Redisson RRatelimiter
+
+   ```java
+   RRateLimiter limiter = redisson.getRateLimiter("buyLimiter");
+   // 初始化，设置模式为“预先生成令牌”，总量10个，每秒产生5个
+   limiter.trySetRate(RateType.OVERALL, 10, 5, RateIntervalUnit.SECONDS);
+   
+   // 尝试获取1个令牌，最多等待2秒
+   if (limiter.tryAcquire(1, 2, TimeUnit.SECONDS)) {
+       doBusiness();
+   }
+   ```
+
+3. Redis + Lua
+
+   ```lua
+   -- 获取令牌的Lua脚本
+   local key = KEYS[1]           -- 令牌桶的key，如 "rate:buy"
+   local rate = tonumber(ARGV[1])  -- 每秒放几个令牌
+   local capacity = tonumber(ARGV[2]) -- 桶容量
+   local now = tonumber(ARGV[3])   -- 当前时间戳（毫秒）
+   local requested = tonumber(ARGV[4]) -- 请求要几个令牌，一般是1
+   
+   -- 计算从上次补充到现在的时间差
+   local last_refresh = tonumber(redis.call('get', key .. ':ts')) or now
+   local tokens = tonumber(redis.call('get', key .. ':tokens')) or capacity
+   
+   -- 补充令牌：时间差(秒) * 速率 + 当前令牌数，但不能超过桶容量
+   local delta = math.max(0, now - last_refresh) / 1000 * rate
+   tokens = math.min(capacity, tokens + delta)
+   
+   -- 判断是否够
+   if tokens >= requested then
+       tokens = tokens - requested
+       -- 更新令牌数和时间戳
+       redis.call('set', key .. ':tokens', tokens)
+       redis.call('set', key .. ':ts', now)
+       return 1 -- 拿到令牌
+   else
+       return 0 -- 不够
+   end
+   ```
+
+   ```java
+   public boolean acquireToken(String key, double rate, int capacity) {
+       DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+       script.setScriptSource(new ResourceScriptSource(new ClassPathResource("rate_limiter.lua")));
+       script.setResultType(Long.class);
+   
+       Long result = redisTemplate.execute(script,
+           Arrays.asList(key),
+           String.valueOf(rate), String.valueOf(capacity),
+           String.valueOf(System.currentTimeMillis()), "1");
+       return result != null && result == 1;
+   }
+   ```
+
+   
+
+
+
 ---
 
 ## 五、Redis 缓存
@@ -799,6 +1083,36 @@ public Result generateReport(Long reportId) {
 - 影响：unack 消息持续积压 + 新消息进来 → MQ 内存/磁盘告警
 - 解决：扩充消费者、优化消费逻辑、设置合理的 prefetch count 限制每次获取量
 - `spring.rabbitmq.listener.simple.prefetch=250`（默认）→ 如果处理慢，调小可减少单消费者积压
+
+### 限流操作：
+
+### Spring Cloud Gateway + Redis Rate Limiter
+
+```yaml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: buy_route
+          uri: lb://order-service
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter:
+                  replenishRate: 10   # 每秒10个令牌
+                  burstCapacity: 20   # 桶容量20
+```
+
+```java
+@Bean
+public KeyResolver userKeyResolver() {
+    return exchange -> Mono.just(
+        exchange.getRequest().getQueryParams().getFirst("userId")
+    );
+}
+```
+
+
 
 ---
 
@@ -1086,6 +1400,7 @@ org/springframework/boot/loader/  → Spring Boot 类加载器
 | WPS 在线编辑 | Q43 |
 | Activity 表 | Q44 |
 | Spring Boot jar | Q45 |
+| MongoTemplate/MongoRepository | Q50 |
 
 
 
@@ -1277,6 +1592,7 @@ public boolean cancel(BusinessActionContext ctx) {
 ```
 
 **优缺点：**
+
 - **优点**：最终一致性，系统解耦，吞吐量高
 - **缺点**：中间状态不可见（用户看到"处理中"），需要补偿机制
 
@@ -1342,6 +1658,7 @@ Spring 通过 CGLIB 动态代理生成 SingletonBean 的子类，重写 `@Lookup
 > 内容如上文代码示例，这里补充核心结论
 
 **`allOf().join()` 的坑：**
+
 - `allOf` 返回的 CompletableFuture 只要所有任务**结束**（不管成功还是异常）就算完成
 - `join()` 不会因为某个子任务异常而抛异常
 - 子任务的异常会被**静默吞掉**
@@ -1363,5 +1680,111 @@ CompletableFuture<String> future = CompletableFuture
     .completeOnTimeout("降级默认值", 3, TimeUnit.SECONDS);
 ```
 
-      
+---
+
+### Q50: Spring Boot 操作 MongoDB——MongoTemplate
+
+在生产项目中，最推荐的方式是 **MongoTemplate**。MongoRepository 只适合简单 CRUD，遇到条件查询、聚合、索引管理就力不从心了。实际项目通常两者共存，但核心操作走 MongoTemplate。
+
+**依赖：**
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
+```
+
+**配置：**
+
+```yaml
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/invoice_db
+      # 或分开配置
+      # host: localhost
+      # port: 27017
+      # database: invoice_db
+```
+
+**实体映射：**
+
+```java
+@Document(collection = "invoice_log")  // 映射到集合
+public class InvoiceLog {
+    @Id
+    private String id;                 // MongoDB 自动生成的 _id
+    @Field("tenant_id")
+    private String tenantId;
+    private String requestBody;
+    private String responseBody;
+    @Field("create_time")
+    private Date createTime;
+    @Indexed                           // 单字段索引
+    private String serialNo;
+}
+```
+
+**条件查询（Query + Criteria）：**
+
+```java
+@Autowired
+private MongoTemplate mongoTemplate;
+
+// 精确匹配 + 范围 + 排序 + 分页
+public List<InvoiceLog> queryLogs(String tenantId, Date start, Date end, int page, int size) {
+    Query query = new Query(
+        Criteria.where("tenant_id").is(tenantId)
+                .and("status").in("SUCCESS", "FAILED")
+                .and("create_time").gte(start).lte(end)
+    );
+    query.with(Sort.by(Sort.Direction.DESC, "create_time"));
+    query.skip((long) (page - 1) * size).limit(size);
+    return mongoTemplate.find(query, InvoiceLog.class);
+}
+```
+
+**批量更新：**
+
+```java
+// 7 天前的临时数据标记为过期
+Update update = new Update().set("status", "EXPIRED");
+mongoTemplate.updateMulti(
+    Query.query(Criteria.where("create_time").lt(sevenDaysAgo)),
+    update,
+    InvoiceLog.class
+);
+```
+
+**聚合管道（分组统计）：**
+
+```java
+// 按渠道统计开票量
+Aggregation agg = Aggregation.newAggregation(
+    Aggregation.match(Criteria.where("status").is("SUCCESS")),
+    Aggregation.group("channel").count().as("total"),
+    Aggregation.sort(Sort.Direction.DESC, "total")
+);
+AggregationResults<ChannelStat> results = mongoTemplate.aggregate(
+    agg, "invoice_log", ChannelStat.class
+);
+```
+
+**TTL 索引——自动过期删除：**
+
+这是 MongoTemplate 最实用的特性之一，比 Redis TTL 更适合大体积数据的自动清理：
+
+```java
+// 创建 TTL 索引：create_time 7 天后文档自动删除
+mongoTemplate.indexOps("invoice_cache")
+    .ensureIndex(new Index().on("create_time", Sort.Direction.ASC)
+                            .expire(7, TimeUnit.DAYS));
+```
+
+**为什么不用 MongoRepository？**
+
+MongoRepository 只适合 `findByName`、`findById` 这类简单场景。一旦涉及多条件组合查询、聚合统计、索引管理，它就搞不定了。实际项目中通常 Service 层同时注入 MongoTemplate 和 MongoRepository，简单读写走 Repository，复杂操作走 Template，各取所长。
+
+​      
 
