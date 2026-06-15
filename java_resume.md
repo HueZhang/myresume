@@ -12,7 +12,7 @@
 
 ## 技术技能
 
-- **Java 基础**：集合、Stream API、多线程、线程池、JUC、异常处理、常用设计模式
+- **Java 基础**：熟练使用集合、Stream API、多线程、线程池、JUC、异常处理、常用设计模式
 - **后端框架**：Spring Boot、Spring MVC、Spring Security、Spring Cloud Alibaba、MyBatis、MyBatis-Plus、JPA
 - **微服务组件**：Spring Cloud Gateway、Nacos 注册/配置中心、OpenFeign、Sentinel 基础限流降级
 - **缓存与中间件**：Redis / Redisson 缓存、分布式锁、SETNX 幂等、Pub/Sub；RocketMQ 普通消息、延迟消息、消费重试、死信队列和幂等消费
@@ -20,8 +20,8 @@
 - **文档与存储**：MongoDB、MongoTemplate、TTL 索引、Elasticsearch 基础检索
 - **业务能力**：RBAC 权限、租户隔离、审批流、数据上报、第三方 API 对接、接口签名与加密、状态机设计
 - **分布式事务**：理解 Seata AT/TCC 适用边界，项目中主要使用本地事务 + 可靠消息 / 状态机 / 补偿任务实现最终一致性
-- **分布式调度**：XXL-Job、Quartz，掌握分片任务、失败重试、任务日志和可重入任务设计
-- **前端协作**：Vue3、Element Plus、Axios，能够完成中后台页面开发和前后端联调
+- **分布式调度**：理解XXL-Job、Quartz，掌握分片任务、失败重试、任务日志和可重入任务设计
+- **前端协作**：熟悉Vue3、Element Plus、Axios，能够完成中后台页面开发和前后端联调
 - **工程与排障**：Knife4j / Swagger 接口文档、Maven、Git、Linux 常用命令、Nginx、Docker、Jenkins、日志排查、接口耗时定位
 - **其他**：Flowable 工作流使用、串口通信 RS232/RS485、AI 工具辅助开发
 
@@ -95,8 +95,6 @@
 
 **6.CMS 存量资产系统**
 
-> 面向国企旧设备、商铺等存量资产展示和管理的小型业务系统。
-
 - 独立负责该子系统的后端接口、数据库表设计和部分前端页面开发
 - 支持资产条目维护、图片管理、多条件筛选、详情展示和上下架控制
 - 通过内容管理和展示页面分离，让业务人员可以维护资产信息，减少开发介入
@@ -133,6 +131,10 @@
 - 支持 API、WebService、数据库视图/中间库等多种院内对接方式，按医院编码、数据类型和时间窗口分批同步数据
 - 使用 XXL-Job 分布式调度处理批量数据，结合医院维度分片、任务日志、状态表和失败重试保证关键医疗数据稳定同步
 - 对接过程中编写接口文档、字段映射表和异常处理说明，降低后续维护成本
+
+- 
+
+1. 
 
 ---
 
