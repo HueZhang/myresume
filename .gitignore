@@ -1,0 +1,42 @@
+# ========== 系统 / 资源管理器垃圾文件 ==========
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+$RECYCLE.BIN/
+*.tmp
+*.log
+*~
+*.bak
+*.orig
+
+# ========== IDE / 编辑器 ==========
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+*.swo
+
+# ========== 本地工具与缓存 ==========
+# Claude Code 本地设置（仅个人机器使用，不提交）
+.claude/settings.local.json
+
+# 通用缓存目录
+.cache/
+.npm-cache/
+node_modules/
+
+# Python 缓存（偶尔用脚本处理文档时产生）
+__pycache__/
+*.pyc
+
+# ========== reference/ 外部资料库 ==========
+# 三个参考仓库自带 .git 目录，避免被当作子模块(gitlink)误提交；
+# 参考资料内容本身正常跟踪。
+reference/**/.git/
+
+# ========== 注意：以下内容保持跟踪，不要忽略 ==========
+# pdf/            —— md 导出 PDF，由 GitHub Action 自动生成并提交
+# 归档/           —— 已合并进题库的原文件备份
+# skills-lock.json —— 技能版本锁定文件

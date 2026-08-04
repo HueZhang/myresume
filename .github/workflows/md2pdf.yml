@@ -99,6 +99,11 @@ jobs:
           if [ "$ANY_CHANGED" = "false" ] || [ -z "$CHANGED_FILES" ]; then
             echo "No changes detected, converting all markdown files..."
             for md_file in *.md; do
+              # 只转换根目录下的 md 文件，跳过 归档/ 等子目录
+              if [[ "$md_file" == */* ]]; then
+                echo "Skipping non-root file: $md_file"
+                continue
+              fi
               if [ -f "$md_file" ] && [[ "$md_file" != "README.md" ]]; then
                 pdf_name="${md_file%.md}.pdf"
                 echo "Converting $md_file to pdf/$pdf_name"
@@ -114,6 +119,11 @@ jobs:
           else
             # 转换变更的文件
             for md_file in $CHANGED_FILES; do
+              # 只转换根目录下的 md 文件，跳过 归档/ 等子目录
+              if [[ "$md_file" == */* ]]; then
+                echo "Skipping non-root file: $md_file"
+                continue
+              fi
               if [ -f "$md_file" ] && [[ "$md_file" != "README.md" ]]; then
                 pdf_name="${md_file%.md}.pdf"
                 echo "Converting $md_file to pdf/$pdf_name"
