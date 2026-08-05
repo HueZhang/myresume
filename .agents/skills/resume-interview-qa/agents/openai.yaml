@@ -1,0 +1,4 @@
+interface:
+  display_name: "简历模拟面试"
+  short_description: "按简历项目与技术栈出题，模拟面试官追问并生成复盘错题本"
+  default_prompt: "使用 $resume-interview-qa 按我的简历（方向：java）模拟一场 30 分钟技术面试。"

@@ -37,6 +37,7 @@
 | `requirements-prioritization-drill` | 系统设计前 5-10 分钟的需求澄清热身 |
 | `interview-generation` | 生成 4 段式编码面试题（默认 Python，Java 方向需明确要求转 Java） |
 | `interview-prep` | 综合出题补充（质量一般，仅考前快速过一遍） |
+| `resume-interview-qa` | 基于简历出题 / 模拟面试 / 面后复盘（按轨读取简历和题库，维护错题本） |
 
 ---
 

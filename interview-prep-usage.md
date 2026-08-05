@@ -17,6 +17,7 @@
 | `requirements-prioritization-drill` | 技能 | 5-10 分钟一轮的需求澄清 / 优先级练习（系统设计前 5 分钟热身） | 系统设计 |
 | `interview-generation` | 技能 | 生成 4 段式编码面试题（实现 / 算法 / 深挖 / 讨论） | 编码面（默认 Python） |
 | `interview-prep` | 技能 | 综合出题：按岗位 / 公司 / 面试类型生成问题 + 回答要点 | 通用补充 |
+| `resume-interview-qa` | 技能 | 基于简历出题 / 模拟面试 / 面后复盘：读取当前轨简历（java / csharp-backend / csharp-desktop），按项目与技术栈生成面试题和追问链，维护错题本 | 所有方向的技术面 |
 
 ---
 
@@ -174,6 +175,18 @@
 使用 interview-prep 技能，按「Java 后端 / 3 年经验 / 技术面 + 行为面」
 生成 20 道题，每题说明考察意图、STAR 框架和回答要点。
 ```
+
+### 4.8 `resume-interview-qa` —— 简历模拟面试
+
+基于简历的技术面练习，三种模式：
+
+```
+模式一（出题）：使用 resume-interview-qa 技能，方向 java，出 15 道题，重点项目深挖。
+模式二（模拟面试）：使用 resume-interview-qa 技能，方向 csharp-backend，模拟 30 分钟面试，一次一题。
+模式三（复盘）：这是我今天被问到的题：[粘贴]，用 resume-interview-qa 帮我复盘并更新错题本。
+```
+
+它会自动读取对应轨的简历（java_resume.md / dotnet_resume.md / wpf_resume.md）和题库（java_qa.md / dotnet_qa.md / wpf_qa.md），按三轨隔离规则出题，答得不好的题写入 `错题本-<方向>.md`。
 
 ---
 
